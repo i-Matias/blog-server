@@ -1,7 +1,7 @@
 import app from "./app";
-import router from "./route";
-import { config } from "./config";
-import connection from "./database";
+import router from "./route/route";
+import { config } from "./config/config";
+import connection from "./database/database";
 
 app.use("/v1", router);
 

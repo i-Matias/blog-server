@@ -7,14 +7,14 @@ const user = `CREATE TABLE IF NOT EXISTS users (
 
 const tag = `CREATE TABLE IF NOT EXISTS tags (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(16) NOT NULL
+    tag_name VARCHAR(16) NOT NULL
     );`;
 
 const post = `CREATE TABLE IF NOT EXISTS posts (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title VARCHAR(16) NOT NULL,
     content VARCHAR(1024) NOT NULL,
-    date DATE NOT NULL,
+    created DATE NOT NULL,
     user_id INT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
     );`;
@@ -27,9 +27,9 @@ const post_tag = `CREATE TABLE IF NOT EXISTS post_tags (
     );`;
 
 const img = `CREATE TABLE IF NOT EXISTS images (
-     id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(16) NOT NULL,
-    data BLOB NOT NULL,
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    alt VARCHAR(16) NOT NULL,
+    img_data BLOB NOT NULL,
     post_id INT NOT NULL,
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE ON UPDATE CASCADE
     );`;
