@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model images {
+  id       Int    @id @default(autoincrement())
+  alt      String @db.VarChar(16)
+  img_data Bytes  @db.Blob
+  post_id  Int
+  posts    posts  @relation(fields: [post_id], references: [id], onDelete: Cascade, map: "images_ibfk_1")
+
+  @@index([post_id], map: "post_id")
+}
+
+model post_tags {
+  post_id Int
+  tag_id  Int
+  posts   posts @relation(fields: [post_id], references: [id], onDelete: Cascade, map: "post_tags_ibfk_1")
+  tags    tags  @relation(fields: [tag_id], references: [id], map: "post_tags_ibfk_2")
+
+  @@id([post_id, tag_id])
+  @@index([tag_id], map: "tag_id")
+}
+
+model posts {
+  id        Int         @id @default(autoincrement())
+  title     String      @db.VarChar(16)
+  content   String      @db.VarChar(1024)
+  created   DateTime    @db.Date
+  user_id   Int
+  images    images[]
+  post_tags post_tags[]
+  users     users       @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "posts_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model tags {
+  id        Int         @id @default(autoincrement())
+  tag_name  String      @db.VarChar(16)
+  post_tags post_tags[]
+}
+
+model users {
+  id       Int     @id @default(autoincrement())
+  username String  @db.VarChar(16)
+  email    String  @db.VarChar(32) @unique
+  password String  @db.VarChar(64)
+  posts    posts[]
+}

@@ -9,36 +9,39 @@ const connection: Connection = mysql.createConnection({
   database: config.db.database,
 });
 
-connection.connect((err: QueryError | null) => {
-  if (err) {
-    console.error("error connecting: " + err.stack);
-  }
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
-  connection.query("USE blogdb", (err: QueryError | null) => {
-    if (err) console.log("error using blogdb");
-  });
+// connection.connect((err: QueryError | null) => {
+//   if (err) {
+//     console.error("error connecting: " + err.stack);
+//   }
 
-  connection.query(user, (err: QueryError | null) => {
-    if (err) console.error("error creating user table" + err.stack);
-  });
+//   connection.query("USE blogdb", (err: QueryError | null) => {
+//     if (err) console.log("error using blogdb");
+//   });
 
-  connection.query(tag, (err: QueryError | null) => {
-    if (err) console.error("error creating tag table: " + err.stack);
-  });
+//   connection.query(user, (err: QueryError | null) => {
+//     if (err) console.error("error creating user table" + err.stack);
+//   });
 
-  connection.query(post, (err: QueryError | null) => {
-    if (err) console.error("error creating post table: " + err.stack);
-  });
+//   connection.query(tag, (err: QueryError | null) => {
+//     if (err) console.error("error creating tag table: " + err.stack);
+//   });
 
-  connection.query(post_tag, (err: QueryError | null) => {
-    if (err) console.error("error creating post_tag table: " + err.stack);
-  });
+//   connection.query(post, (err: QueryError | null) => {
+//     if (err) console.error("error creating post table: " + err.stack);
+//   });
 
-  connection.query(img, (err: QueryError | null) => {
-    if (err) console.error("error creating img table: " + err.stack);
-  });
+//   connection.query(post_tag, (err: QueryError | null) => {
+//     if (err) console.error("error creating post_tag table: " + err.stack);
+//   });
 
-  console.log("connected as id " + connection.threadId);
-});
+//   connection.query(img, (err: QueryError | null) => {
+//     if (err) console.error("error creating img table: " + err.stack);
+//   });
+
+//   console.log("connected as id " + connection.threadId);
+// });
 
 export default connection;

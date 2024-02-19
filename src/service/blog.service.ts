@@ -20,43 +20,61 @@ import {
   updateUserName,
 } from "../database/update";
 import { deleteUser } from "../database/deleteUser";
+import prisma from "../database/prisma";
+import { img } from "../database/table";
 
 const createUser = async (
   username: string,
   email: string,
   password: string
 ): Promise<IUser | null> => {
-  try {
-    const hashPassword = await bcrypt.hash(password, 8);
+  const hashPassword = await bcrypt.hash(password, 8);
 
-    const result = (await executeQuery(connection, insertUser, [
+  const user = await prisma.users.create({
+    data: {
       username,
       email,
-      hashPassword,
-    ])) as ResultSetHeader;
+      password: hashPassword,
+    },
+  });
 
-    return { id: result.insertId, username, email, password: hashPassword };
-  } catch (error) {
-    console.error("Error hashing password: ", error);
-    return null;
-  }
+  return user;
+  // const result = (await executeQuery(connection, insertUser, [
+  //   username,
+  //   email,
+  //   hashPassword,
+  // ])) as ResultSetHeader;
+
+  // return { id: result.insertId, username, email, password: hashPassword };
 };
 
 const getUserByEmail = async (
   email: string,
   password: string
 ): Promise<IUser | null> => {
-  const select = `SELECT * FROM users WHERE email = ?`;
+  // const select = `SELECT * FROM users WHERE email = ?`;
+  // const result = (await executeQuery(connection, select, [
+  //   email,
+  // ])) as RowDataPacket[];
+  // const resultPassword = result[0].password;
 
-  const result = (await executeQuery(connection, select, [
-    email,
-  ])) as RowDataPacket[];
+  // const match = await bcrypt.compare(password, resultPassword);
+  // if (match) {
+  //   return { id: result[0].id, username: result[0].username, email, password };
+  // }
+  // return null;
 
-  const resultPassword = result[0].password;
-  const isMatch = await bcrypt.compare(password, resultPassword);
+  const user = await prisma.users.findUnique({
+    where: {
+      email,
+    },
+  });
 
-  if (isMatch) {
-    return result[0] as IUser;
+  if (!user) return null;
+
+  const match = await bcrypt.compare(password, user.password);
+  if (match) {
+    return user;
   }
   return null;
 };
@@ -71,7 +89,6 @@ const createPost = async (
 ): Promise<IPost | null> => {
   try {
     const created = new Date();
-
     const postResult = (await executeQuery(connection, insertToPost, [
       title,
       content,
@@ -79,18 +96,14 @@ const createPost = async (
       userId,
     ])) as ResultSetHeader;
     const postId = postResult.insertId;
-
     if (img && alt) {
       await executeQuery(connection, insertToImg, [alt, img, postId]);
     }
-
     const tagResult = (await executeQuery(connection, selectTag, [
       tagName,
     ])) as RowDataPacket[];
     const tagId = tagResult[0].id;
-
     await executeQuery(connection, insertToPost_Tags, [postId, tagId]);
-
     return { id: postId, title, content, created, userId };
   } catch (error) {
     console.error("Error hashing password: ", error);
