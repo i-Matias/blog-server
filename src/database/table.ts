@@ -22,8 +22,9 @@ const post = `CREATE TABLE IF NOT EXISTS posts (
 const post_tag = `CREATE TABLE IF NOT EXISTS post_tags (
     post_id INT,
     tag_id INT,
-    FOREIGN KEY (post_id) REFERENCES posts(id),
-    FOREIGN KEY (tag_id) REFERENCES tags(id)
+    PRIMARY KEY (post_id, tag_id),
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE RESTRICT ON UPDATE CASCADE
     );`;
 
 const img = `CREATE TABLE IF NOT EXISTS images (

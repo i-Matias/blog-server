@@ -8,6 +8,7 @@ import {
   editUserName,
   getPosts,
   getUserByEmail,
+  searchForPost,
 } from "../service/blog.service";
 import { StatusCodes } from "http-status-codes";
 import { generateToken } from "../midleware/auth";
@@ -119,6 +120,16 @@ const deleteProfile = async (req: Request, res: Response) => {
   return res.status(StatusCodes.BAD_REQUEST).send("Failed to delete profile");
 };
 
+const retrievePost = async (req: Request, res: Response) => {
+  const user = req.user as JwtPayload;
+  if (!user) return res.status(StatusCodes.UNAUTHORIZED).send("Unauthorized");
+
+  const userId = +user.id;
+  const postTitle = req.body.title;
+  const post = await searchForPost(userId, postTitle);
+  return res.status(StatusCodes.OK).send(post);
+};
+
 export {
   register,
   login,
@@ -127,4 +138,5 @@ export {
   editProfile,
   retrievePosts,
   deleteProfile,
+  retrievePost,
 };

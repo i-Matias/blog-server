@@ -9,6 +9,7 @@ import {
 } from "../database/insert";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import {
+  searchPostForUserId,
   selectAllPosts,
   selectAllPostsWithoutUserId,
   selectTag,
@@ -99,7 +100,6 @@ const createPost = async (
 
 const getPosts = async (ignoreUserId?: number): Promise<Array<IFullPost>> => {
   if (ignoreUserId) {
-    console.log("ignoreUserId: ", ignoreUserId);
     const joinPostsUsersImagesTagsResult = (await executeQuery(
       connection,
       selectAllPostsWithoutUserId,
@@ -174,6 +174,19 @@ const deleteUserProfile = async (userId: number): Promise<boolean> => {
   return false;
 };
 
+const searchForPost = async (
+  userId: number,
+  title: string
+): Promise<Array<IFullPost>> => {
+  const result = (await executeQuery(connection, searchPostForUserId, [
+    userId,
+    title,
+  ])) as RowDataPacket[];
+
+  const post = mapPost(result);
+  return post;
+};
+
 export {
   createUser,
   getUserByEmail,
@@ -183,4 +196,5 @@ export {
   editEmail,
   editPassword,
   deleteUserProfile,
+  searchForPost,
 };

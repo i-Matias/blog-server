@@ -6,6 +6,7 @@ import {
   login,
   post,
   register,
+  retrievePost,
   retrievePosts,
 } from "../controller/blog.controller";
 import { authToken } from "../midleware/auth";
@@ -21,6 +22,7 @@ router.get("/", (req, res) => {
 router.post("/register", register);
 router.post("/login", authToken, login);
 router.post("/post", authToken, upload.single("img"), post);
+router.post("/post/search", authToken, retrievePost);
 
 router.get("/guest", guest);
 router.get("/posts", authToken, retrievePosts);
