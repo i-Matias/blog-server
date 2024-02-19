@@ -174,12 +174,8 @@ const deleteUserProfile = async (userId: number): Promise<boolean> => {
   return false;
 };
 
-const searchForPost = async (
-  userId: number,
-  title: string
-): Promise<Array<IFullPost>> => {
+const searchForPost = async (title: string): Promise<Array<IFullPost>> => {
   const result = (await executeQuery(connection, searchPostForUserId, [
-    userId,
     title,
   ])) as RowDataPacket[];
 

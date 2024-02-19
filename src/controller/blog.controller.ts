@@ -124,9 +124,9 @@ const retrievePost = async (req: Request, res: Response) => {
   const user = req.user as JwtPayload;
   if (!user) return res.status(StatusCodes.UNAUTHORIZED).send("Unauthorized");
 
-  const userId = +user.id;
-  const postTitle = req.body.title;
-  const post = await searchForPost(userId, postTitle);
+  const postTitle = req.query.title as string;
+  const post = await searchForPost(postTitle);
+
   return res.status(StatusCodes.OK).send(post);
 };
 

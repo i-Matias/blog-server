@@ -22,7 +22,7 @@ const searchPostForUserId = `SELECT u.username, p.title, p.content, p.created, t
                             INNER JOIN post_tags pt ON p.id = pt.post_id
                             INNER JOIN tags t ON pt.tag_id = t.id
                             INNER JOIN images img ON p.id = img.post_id
-                            WHERE u.id = ? && p.title = ?`;
+                            WHERE p.title = ?`;
 
 const selectTag = `SELECT * FROM tags WHERE tag_name = ?`;
 
