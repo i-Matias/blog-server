@@ -19,17 +19,16 @@ router.get("/", (req, res) => {
   res.send("Express + TypeScript Server");
 });
 
-router.post("/register", register);
-router.post("/login", authToken, login);
-router.post("/post", authToken, upload.single("img"), post);
-
 router.get("/guest", guest);
-router.get("/posts", authToken, retrievePosts);
-router.get("/post/search/", authToken, retrievePost);
-
-
-router.put("/edit-profile", authToken, editProfile);
-
-router.delete("/delete-profile", authToken, deleteProfile);
+router.post("/register", register);
+router
+  .use(authToken)
+  .post("/register", register)
+  .post("/login", login)
+  .post("/post", upload.single("img"), post)
+  .get("/posts", retrievePosts)
+  .get("/post/search/", retrievePost)
+  .put("/edit-profile", editProfile)
+  .delete("/delete-profile", deleteProfile);
 
 export default router;
