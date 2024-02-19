@@ -9,9 +9,6 @@ const connection: Connection = mysql.createConnection({
   database: config.db.database,
 });
 
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
-
 // connection.connect((err: QueryError | null) => {
 //   if (err) {
 //     console.error("error connecting: " + err.stack);

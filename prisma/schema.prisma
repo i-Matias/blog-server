@@ -42,14 +42,15 @@ model posts {
 
 model tags {
   id        Int         @id @default(autoincrement())
-  tag_name  String      @db.VarChar(16)
+  tag_name  String      @unique @db.VarChar(16)
   post_tags post_tags[]
 }
 
 model users {
   id       Int     @id @default(autoincrement())
   username String  @db.VarChar(16)
-  email    String  @db.VarChar(32) @unique
+  email    String  @unique @db.VarChar(32)
   password String  @db.VarChar(64)
   posts    posts[]
 }
+

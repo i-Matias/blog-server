@@ -35,6 +35,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
   if (user) {
     return res.status(StatusCodes.OK).send("User logged in successfully");
   }
+
   return res.status(StatusCodes.UNAUTHORIZED).send("Invalid email or password");
 });
 

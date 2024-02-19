@@ -87,31 +87,74 @@ const createPost = async (
   alt: string,
   img: Buffer | undefined
 ): Promise<IPost | null> => {
-  try {
-    const created = new Date();
-    const postResult = (await executeQuery(connection, insertToPost, [
+  // try {
+  //   const created = new Date();
+  //   const postResult = (await executeQuery(connection, insertToPost, [
+  //     title,
+  //     content,
+  //     created,
+  //     userId,
+  //   ])) as ResultSetHeader;
+  //   const postId = postResult.insertId;
+  //   if (img && alt) {
+  //     await executeQuery(connection, insertToImg, [alt, img, postId]);
+  //   }
+  //   const tagResult = (await executeQuery(connection, selectTag, [
+  //     tagName,
+  //   ])) as RowDataPacket[];
+  //   const tagId = tagResult[0].id;
+  //   await executeQuery(connection, insertToPost_Tags, [postId, tagId]);
+  //   return { id: postId, title, content, created, userId };
+  // } catch (error) {
+  //   console.error("Error hashing password: ", error);
+  //   return null;
+  // }
+
+  const created = new Date();
+  const post = await prisma.posts.create({
+    data: {
       title,
       content,
       created,
-      userId,
-    ])) as ResultSetHeader;
-    const postId = postResult.insertId;
-    if (img && alt) {
-      await executeQuery(connection, insertToImg, [alt, img, postId]);
-    }
-    const tagResult = (await executeQuery(connection, selectTag, [
-      tagName,
-    ])) as RowDataPacket[];
-    const tagId = tagResult[0].id;
-    await executeQuery(connection, insertToPost_Tags, [postId, tagId]);
-    return { id: postId, title, content, created, userId };
-  } catch (error) {
-    console.error("Error hashing password: ", error);
-    return null;
+      user_id: userId,
+    },
+  });
+
+  const postId = post.id;
+
+  if (img && alt) {
+    await prisma.images.create({
+      data: {
+        alt,
+        img_data: img,
+        post_id: postId,
+      },
+    });
   }
+
+  const tag = await prisma.tags.findUnique({
+    where: {
+      tag_name: tagName,
+    },
+  });
+
+  if (!tag) {
+    await prisma.tags.create({
+      data: {
+        tag_name: tagName,
+      },
+    });
+  }
+  return {
+    id: postId,
+    title,
+    content,
+    created,
+    userId: userId,
+  } as IPost;
 };
 
-const getPosts = async (ignoreUserId?: number): Promise<Array<IFullPost>> => {
+const getPosts = async (ignoreUserId?: number): Promise<Array<any>> => {
   if (ignoreUserId) {
     const joinPostsUsersImagesTagsResult = (await executeQuery(
       connection,
@@ -122,13 +165,18 @@ const getPosts = async (ignoreUserId?: number): Promise<Array<IFullPost>> => {
     const posts = mapPost(joinPostsUsersImagesTagsResult);
     return posts;
   }
-  const joinPostsUsersImagesTagsResult = (await executeQuery(
-    connection,
-    selectAllPosts,
-    []
-  )) as RowDataPacket[];
+  // const joinPostsUsersImagesTagsResult = (await executeQuery(
+  //   connection,
+  //   selectAllPosts,
+  //   []
+  // )) as RowDataPacket[];
 
-  const posts = mapPost(joinPostsUsersImagesTagsResult);
+  // const posts = mapPost(joinPostsUsersImagesTagsResult);
+  // return posts;
+  const posts = await prisma.posts.findMany({
+    include: { images: true, users: true },
+  });
+
   return posts;
 };
 
