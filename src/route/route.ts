@@ -23,7 +23,6 @@ router.get("/guest", guest);
 router.post("/register", register);
 router
   .use(authToken)
-  .post("/register", register)
   .post("/login", login)
   .post("/post", upload.single("img"), post)
   .get("/posts", retrievePosts)
