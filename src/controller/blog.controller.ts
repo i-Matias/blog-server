@@ -1,4 +1,7 @@
 import { Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
+import { JwtPayload } from "jsonwebtoken";
+import { generateToken } from "../midleware/auth";
 import {
   createPost,
   createUser,
@@ -10,9 +13,6 @@ import {
   getUserByEmail,
   searchForPost,
 } from "../service/blog.service";
-import { StatusCodes } from "http-status-codes";
-import { generateToken } from "../midleware/auth";
-import { JwtPayload } from "jsonwebtoken";
 import { catchAsync } from "../utils/catchasync";
 
 const register = catchAsync(async (req: Request, res: Response) => {
@@ -53,29 +53,57 @@ const post = catchAsync(async (req: Request, res: Response) => {
   const { title, content, tagName, alt } = req.body;
   const img = req.file?.buffer;
 
-  const status = await createPost(userId, title, content, tagName, alt, img);
-  if (status) {
-    return res.status(StatusCodes.CREATED).send("Post created successfully");
+  const post = await createPost({
+    userId,
+    title,
+    content,
+    tagName,
+    alt,
+    img,
+  });
+  if (post) {
+    return res.status(StatusCodes.CREATED).send(post);
   }
   return res.status(StatusCodes.BAD_REQUEST).send("Failed to create post");
 });
 
-const editProfile = catchAsync(async (req: Request, res: Response) => {
-  const { username, email, password } = req.body;
+const editUserNameProfile = catchAsync(async (req: Request, res: Response) => {
+  const { username } = req.body;
   const user = req.user as JwtPayload;
   const userId = +user.id;
 
-  let status;
-  if (username) {
-    status = await editUserName(userId, username);
-  } else if (email) {
-    status = await editEmail(userId, email);
-  } else if (password) {
-    status = await editPassword(userId, password);
-  }
+  const status = await editUserName(userId, username);
 
   if (status) {
-    return res.status(StatusCodes.OK).send("Profile updated successfully");
+    return res.status(StatusCodes.OK).send(status);
+  } else {
+    return res.status(StatusCodes.BAD_REQUEST).send("Failed to update profile");
+  }
+});
+
+const editEmailProfile = catchAsync(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const user = req.user as JwtPayload;
+  const userId = +user.id;
+
+  const status = await editEmail(userId, email);
+
+  if (status) {
+    return res.status(StatusCodes.OK).send(status);
+  } else {
+    return res.status(StatusCodes.BAD_REQUEST).send("Failed to update profile");
+  }
+});
+
+const editPasswordProfile = catchAsync(async (req: Request, res: Response) => {
+  const { password } = req.body;
+  const user = req.user as JwtPayload;
+  const userId = +user.id;
+
+  const status = await editPassword(userId, password);
+
+  if (status) {
+    return res.status(StatusCodes.OK).send(status);
   } else {
     return res.status(StatusCodes.BAD_REQUEST).send("Failed to update profile");
   }
@@ -97,7 +125,7 @@ const deleteProfile = catchAsync(async (req: Request, res: Response) => {
   const userId = +user.id;
   const status = await deleteUserProfile(userId);
   if (status) {
-    return res.status(StatusCodes.OK).send("Profile deleted successfully");
+    return res.status(StatusCodes.OK).send(status);
   }
   return res.status(StatusCodes.BAD_REQUEST).send("Failed to delete profile");
 });
@@ -107,18 +135,21 @@ const retrievePost = catchAsync(async (req: Request, res: Response) => {
   if (!user) return res.status(StatusCodes.UNAUTHORIZED).send("Unauthorized");
 
   const postTitle = req.query.title as string;
-  const post = await searchForPost(postTitle);
+  const userId = +user.id;
+  const post = await searchForPost(userId, postTitle);
 
   return res.status(StatusCodes.OK).send(post);
 });
 
 export {
-  register,
-  login,
-  guest,
-  post,
-  editProfile,
-  retrievePosts,
   deleteProfile,
+  editEmailProfile,
+  editPasswordProfile,
+  editUserNameProfile,
+  guest,
+  login,
+  post,
+  register,
   retrievePost,
+  retrievePosts,
 };

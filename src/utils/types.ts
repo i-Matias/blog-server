@@ -26,6 +26,15 @@ interface IFullPost {
   img: Buffer;
 }
 
+interface ICreatePostParams {
+  userId: number;
+  title: string;
+  content: string;
+  tagName: string;
+  alt: string;
+  img: Buffer | undefined;
+}
+
 const executeQuery = (
   connection: Connection,
   query: string,
@@ -65,4 +74,4 @@ declare global {
   }
 }
 
-export { IUser, IPost, IFullPost, mapPost, executeQuery };
+export { IUser, IPost, IFullPost, mapPost, executeQuery, ICreatePostParams };

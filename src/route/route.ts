@@ -1,7 +1,10 @@
 import express from "express";
+import multer from "multer";
 import {
   deleteProfile,
-  editProfile,
+  editEmailProfile,
+  editPasswordProfile,
+  editUserNameProfile,
   guest,
   login,
   post,
@@ -10,7 +13,6 @@ import {
   retrievePosts,
 } from "../controller/blog.controller";
 import { authToken } from "../midleware/auth";
-import multer from "multer";
 
 const router = express.Router();
 const upload = multer();
@@ -27,7 +29,9 @@ router
   .post("/post", upload.single("img"), post)
   .get("/posts", retrievePosts)
   .get("/post/search/", retrievePost)
-  .put("/edit-profile", editProfile)
+  .put("/edit-profile/username", editUserNameProfile)
+  .put("/edit-profile/email", editEmailProfile)
+  .put("/edit-profile/password", editPasswordProfile)
   .delete("/delete-profile", deleteProfile);
 
 export default router;

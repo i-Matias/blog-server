@@ -1,27 +1,6 @@
-import connection from "../database/database";
 import bcrypt from "bcrypt";
-import { IFullPost, IPost, IUser, executeQuery, mapPost } from "../utils/types";
-import {
-  insertToImg,
-  insertToPost,
-  insertToPost_Tags,
-  insertUser,
-} from "../database/insert";
-import { ResultSetHeader, RowDataPacket } from "mysql2";
-import {
-  searchPostForUserId,
-  selectAllPosts,
-  selectAllPostsWithoutUserId,
-  selectTag,
-} from "../database/select";
-import {
-  updateEmail,
-  updatePassword,
-  updateUserName,
-} from "../database/update";
-import { deleteUser } from "../database/deleteUser";
 import prisma from "../database/prisma";
-import { img } from "../database/table";
+import { ICreatePostParams, IUser } from "../utils/types";
 
 const createUser = async (
   username: string,
@@ -39,31 +18,12 @@ const createUser = async (
   });
 
   return user;
-  // const result = (await executeQuery(connection, insertUser, [
-  //   username,
-  //   email,
-  //   hashPassword,
-  // ])) as ResultSetHeader;
-
-  // return { id: result.insertId, username, email, password: hashPassword };
 };
 
 const getUserByEmail = async (
   email: string,
   password: string
 ): Promise<IUser | null> => {
-  // const select = `SELECT * FROM users WHERE email = ?`;
-  // const result = (await executeQuery(connection, select, [
-  //   email,
-  // ])) as RowDataPacket[];
-  // const resultPassword = result[0].password;
-
-  // const match = await bcrypt.compare(password, resultPassword);
-  // if (match) {
-  //   return { id: result[0].id, username: result[0].username, email, password };
-  // }
-  // return null;
-
   const user = await prisma.users.findUnique({
     where: {
       email,
@@ -79,179 +39,147 @@ const getUserByEmail = async (
   return null;
 };
 
-const createPost = async (
-  userId: number,
-  title: string,
-  content: string,
-  tagName: string,
-  alt: string,
-  img: Buffer | undefined
-): Promise<IPost | null> => {
-  // try {
-  //   const created = new Date();
-  //   const postResult = (await executeQuery(connection, insertToPost, [
-  //     title,
-  //     content,
-  //     created,
-  //     userId,
-  //   ])) as ResultSetHeader;
-  //   const postId = postResult.insertId;
-  //   if (img && alt) {
-  //     await executeQuery(connection, insertToImg, [alt, img, postId]);
-  //   }
-  //   const tagResult = (await executeQuery(connection, selectTag, [
-  //     tagName,
-  //   ])) as RowDataPacket[];
-  //   const tagId = tagResult[0].id;
-  //   await executeQuery(connection, insertToPost_Tags, [postId, tagId]);
-  //   return { id: postId, title, content, created, userId };
-  // } catch (error) {
-  //   console.error("Error hashing password: ", error);
-  //   return null;
-  // }
+const createPost = async ({
+  userId,
+  title,
+  content,
+  tagName,
+  alt,
+  img,
+}: ICreatePostParams): Promise<{} | null> => {
+  return await prisma
+    .$transaction(async (prisma) => {
+      const tag = await prisma.tags.findUnique({
+        where: { tag_name: tagName },
+      });
 
-  const created = new Date();
-  const post = await prisma.posts.create({
-    data: {
-      title,
-      content,
-      created,
-      user_id: userId,
-    },
-  });
+      if (!tag) return null;
 
-  const postId = post.id;
+      const post = await prisma.posts.create({
+        data: {
+          title,
+          content,
+          created: new Date(),
+          user_id: userId,
+          post_tags: {
+            create: {
+              tag_id: tag.id,
+            },
+          },
+          images: {
+            create: {
+              alt,
+              img_data: img ?? Buffer.from(""),
+            },
+          },
+        },
+        include: {
+          images: true,
+          post_tags: true,
+        },
+      });
 
-  if (img && alt) {
-    await prisma.images.create({
-      data: {
-        alt,
-        img_data: img,
-        post_id: postId,
-      },
+      return post;
+    })
+    .catch((error) => {
+      console.error("Failed to create post:", error);
+      return null;
     });
-  }
-
-  const tag = await prisma.tags.findUnique({
-    where: {
-      tag_name: tagName,
-    },
-  });
-
-  if (!tag) {
-    await prisma.tags.create({
-      data: {
-        tag_name: tagName,
-      },
-    });
-  }
-  return {
-    id: postId,
-    title,
-    content,
-    created,
-    userId: userId,
-  } as IPost;
 };
 
-const getPosts = async (ignoreUserId?: number): Promise<Array<any>> => {
-  if (ignoreUserId) {
-    const joinPostsUsersImagesTagsResult = (await executeQuery(
-      connection,
-      selectAllPostsWithoutUserId,
-      [ignoreUserId]
-    )) as RowDataPacket[];
+const getPosts = async (ignoreUserId?: number): Promise<Array<{}>> => {
+  const whereClause = ignoreUserId ? { user_id: { not: ignoreUserId } } : {};
 
-    const posts = mapPost(joinPostsUsersImagesTagsResult);
-    return posts;
-  }
-  // const joinPostsUsersImagesTagsResult = (await executeQuery(
-  //   connection,
-  //   selectAllPosts,
-  //   []
-  // )) as RowDataPacket[];
-
-  // const posts = mapPost(joinPostsUsersImagesTagsResult);
-  // return posts;
   const posts = await prisma.posts.findMany({
-    include: { images: true, users: true },
+    where: whereClause,
+    include: {
+      images: true,
+      users: true,
+      post_tags: true,
+    },
   });
 
   return posts;
 };
 
-const editUserName = async (
-  userId: number,
-  username: string
-): Promise<boolean> => {
-  const result = (await executeQuery(connection, updateUserName, [
-    username,
-    userId,
-  ])) as ResultSetHeader;
+const editUserName = async (userId: number, username: string): Promise<{}> => {
+  const updatedUser = await prisma.users.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      username,
+    },
+  });
 
-  if (result.affectedRows > 0) {
-    return true;
-  }
-  return false;
+  return updatedUser;
 };
 
-const editEmail = async (userId: number, email: string): Promise<boolean> => {
-  const result = (await executeQuery(connection, updateEmail, [
-    email,
-    userId,
-  ])) as ResultSetHeader;
-
-  if (result.affectedRows > 0) {
-    return true;
-  }
-  return false;
+const editEmail = async (userId: number, email: string): Promise<{}> => {
+  const updatedUser = await prisma.users.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      email,
+    },
+  });
+  return updatedUser;
 };
 
-const editPassword = async (
-  userId: number,
-  password: string
-): Promise<boolean> => {
+const editPassword = async (userId: number, password: string): Promise<{}> => {
   const hashPassword = await bcrypt.hash(password, 8);
 
-  const result = (await executeQuery(connection, updatePassword, [
-    hashPassword,
-    userId,
-  ])) as ResultSetHeader;
-
-  if (result.affectedRows > 0) {
-    return true;
-  }
-  return false;
+  const updatedUser = await prisma.users.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      password: hashPassword,
+    },
+  });
+  return updatedUser;
 };
 
-const deleteUserProfile = async (userId: number): Promise<boolean> => {
-  const result = (await executeQuery(connection, deleteUser, [
-    userId,
-  ])) as ResultSetHeader;
+const deleteUserProfile = async (userId: number): Promise<{}> => {
+  const deletedUser = await prisma.users.delete({
+    where: {
+      id: userId,
+    },
+  });
 
-  if (result.affectedRows > 0) {
-    return true;
-  }
-  return false;
+  return deletedUser;
 };
 
-const searchForPost = async (title: string): Promise<Array<IFullPost>> => {
-  const result = (await executeQuery(connection, searchPostForUserId, [
-    title,
-  ])) as RowDataPacket[];
+const searchForPost = async (
+  userId: number,
+  title: string
+): Promise<Array<{}>> => {
+  const searchedPost = await prisma.posts.findMany({
+    where: {
+      user_id: userId,
+      AND: {
+        title: title,
+      },
+    },
+    include: {
+      images: true,
+      users: true,
+      post_tags: true,
+    },
+  });
 
-  const post = mapPost(result);
-  return post;
+  return searchedPost;
 };
 
 export {
-  createUser,
-  getUserByEmail,
   createPost,
-  getPosts,
-  editUserName,
+  createUser,
+  deleteUserProfile,
   editEmail,
   editPassword,
-  deleteUserProfile,
+  editUserName,
+  getPosts,
+  getUserByEmail,
   searchForPost,
 };
