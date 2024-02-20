@@ -34,7 +34,6 @@ export const validateLogin = [
 export const validatePost = [
   body("title").isString().isLength({ min: 3, max: 50 }),
   body("content").isString().isLength({ min: 3 }),
-  body("img").notEmpty(),
   body("tagName").notEmpty(),
   body("alt").isString().isLength({ min: 3, max: 50 }),
   async (req: Request, res: Response, next: NextFunction) => {

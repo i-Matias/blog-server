@@ -31,7 +31,7 @@ router.post("/register", validateRegister, register);
 router.post("/login", validateLogin, login);
 router
   .use(authToken)
-  .post("/post", validatePost, upload.single("img"), post)
+  .post("/post", upload.single("img"), validatePost, post)
   .get("/posts", retrievePosts)
   .get("/post/search/", retrievePost)
   .put("/edit-profile/username", editUserNameProfile)
