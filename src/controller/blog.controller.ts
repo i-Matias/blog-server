@@ -139,6 +139,7 @@ const retrievePost = catchAsync(async (req: Request, res: Response) => {
 
   const postTitle = req.query.title as string;
   const userId = +user.id;
+
   const post = await searchForPost(userId, postTitle);
 
   return res.status(StatusCodes.OK).send(post);

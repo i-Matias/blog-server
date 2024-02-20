@@ -170,10 +170,10 @@ const searchForPost = async (
 ): Promise<Array<posts>> => {
   const searchedPost = await prisma.posts.findMany({
     where: {
-      user_id: userId,
-      AND: {
-        title: title,
+      user_id: {
+        not: userId,
       },
+      title: title,
     },
     include: {
       images: true,
@@ -181,6 +181,7 @@ const searchForPost = async (
       post_tags: true,
     },
   });
+  console.log(searchedPost);
 
   return searchedPost;
 };
