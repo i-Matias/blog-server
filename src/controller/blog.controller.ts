@@ -40,7 +40,9 @@ const login = catchAsync(async (req: Request, res: Response) => {
 });
 
 const guest = catchAsync(async (req: Request, res: Response) => {
-  const posts = await getPosts();
+  const page = req.query.page as string;
+
+  const posts = await getPosts(page);
   return res.status(StatusCodes.OK).send(posts);
 });
 
@@ -114,7 +116,8 @@ const retrievePosts = catchAsync(async (req: Request, res: Response) => {
   if (!user) return res.status(StatusCodes.UNAUTHORIZED).send("Unauthorized");
 
   const userId = +user.id;
-  const post = await getPosts(userId);
+  const page = req.query.page as string;
+  const post = await getPosts(page, userId);
   return res.status(StatusCodes.OK).send(post);
 });
 

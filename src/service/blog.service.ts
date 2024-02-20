@@ -87,10 +87,15 @@ const createPost = async ({
     });
 };
 
-const getPosts = async (ignoreUserId?: number): Promise<Array<{}>> => {
+const getPosts = async (
+  page: string,
+  ignoreUserId?: number
+): Promise<Array<{}>> => {
   const whereClause = ignoreUserId ? { user_id: { not: ignoreUserId } } : {};
 
   const posts = await prisma.posts.findMany({
+    skip: +page * 10,
+    take: 10,
     where: whereClause,
     include: {
       images: true,

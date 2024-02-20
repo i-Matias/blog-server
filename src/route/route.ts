@@ -26,7 +26,7 @@ router.get("/", (req, res) => {
   res.send("Express + TypeScript Server");
 });
 
-router.get("/guest", guest);
+router.get("/guest/", guest);
 router.post("/register", validateRegister, register);
 router.post("/login", validateLogin, login);
 router
