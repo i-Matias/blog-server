@@ -5,3 +5,5 @@ node_modules
 
 # Build files
 dist
+
+prisma/migrations
