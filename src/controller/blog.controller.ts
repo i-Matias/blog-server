@@ -20,8 +20,7 @@ const register = catchAsync(async (req: Request, res: Response) => {
   const user = await createUser(username, email, password);
 
   if (user) {
-    const token = generateToken(user);
-    return res.status(StatusCodes.CREATED).send(token);
+    return res.status(StatusCodes.CREATED).send(user);
   } else {
     return res.status(StatusCodes.BAD_REQUEST).send("Failed to create user");
   }
@@ -33,7 +32,8 @@ const login = catchAsync(async (req: Request, res: Response) => {
   const user = await getUserByEmail(email, password);
 
   if (user) {
-    return res.status(StatusCodes.OK).send("User logged in successfully");
+    const token = generateToken(user);
+    return res.status(StatusCodes.CREATED).send(token);
   }
 
   return res.status(StatusCodes.UNAUTHORIZED).send("Invalid email or password");

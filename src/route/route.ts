@@ -13,6 +13,11 @@ import {
   retrievePosts,
 } from "../controller/blog.controller";
 import { authToken } from "../midleware/auth";
+import {
+  validateLogin,
+  validatePost,
+  validateRegister,
+} from "../midleware/validation";
 
 const router = express.Router();
 const upload = multer();
@@ -22,11 +27,11 @@ router.get("/", (req, res) => {
 });
 
 router.get("/guest", guest);
-router.post("/register", register);
+router.post("/register", validateRegister, register);
+router.post("/login", validateLogin, login);
 router
   .use(authToken)
-  .post("/login", login)
-  .post("/post", upload.single("img"), post)
+  .post("/post", validatePost, upload.single("img"), post)
   .get("/posts", retrievePosts)
   .get("/post/search/", retrievePost)
   .put("/edit-profile/username", editUserNameProfile)
