@@ -32,7 +32,7 @@ router.post("/login", validateLogin, login);
 router
   .use(authToken)
   .post("/post", upload.single("img"), validatePost, post)
-  .get("/posts", retrievePosts)
+  .get("/posts/", retrievePosts)
   .get("/post/search/", retrievePost)
   .put("/edit-profile/username", editUserNameProfile)
   .put("/edit-profile/email", editEmailProfile)

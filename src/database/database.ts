@@ -1,6 +1,5 @@
-import mysql, { Connection, QueryError } from "mysql2";
+import mysql, { Connection } from "mysql2";
 import { config } from "../config/config";
-import { user, tag, post, post_tag, img } from "./table";
 
 const connection: Connection = mysql.createConnection({
   host: config.db.host,
