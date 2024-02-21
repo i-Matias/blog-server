@@ -32,7 +32,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
   const user = await getUserByEmail(email, password);
 
   if (user) {
-    const token = generateToken(user);
+    const token = generateToken(user.id);
     return res.status(StatusCodes.CREATED).send(token);
   }
 

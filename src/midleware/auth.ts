@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { TokenExpiredError } from "jsonwebtoken";
 import { config } from "../config/config";
-import { IUser } from "../utils/types";
 
 const authToken = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers["authorization"];
@@ -15,13 +14,14 @@ const authToken = (req: Request, res: Response, next: NextFunction) => {
     req.user = verified;
     next();
   } catch (error) {
+    if (error instanceof TokenExpiredError) {
+      res.status(401).send("Token Expired");
+    }
     res.status(400).send("Invalid Token");
   }
 };
 
-const generateToken = (user: IUser) => {
-  const { id } = user;
-
+const generateToken = (id: number) => {
   return jwt.sign({ id }, config.jwt.secret as string, {
     expiresIn: "1h",
   });
