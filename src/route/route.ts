@@ -14,6 +14,9 @@ import {
 } from "../controller/blog.controller";
 import { authToken } from "../midleware/auth";
 import {
+  validateEditedUserName,
+  validateEditedEmail,
+  validateEditedPassword,
   validateLogin,
   validatePost,
   validateRegister,
@@ -34,9 +37,9 @@ router
   .post("/post", upload.single("img"), validatePost, post)
   .get("/posts/", retrievePosts)
   .get("/post/search/", retrievePost)
-  .put("/edit-profile/username", editUserNameProfile)
-  .put("/edit-profile/email", editEmailProfile)
-  .put("/edit-profile/password", editPasswordProfile)
+  .put("/edit-profile/username", validateEditedUserName, editUserNameProfile)
+  .put("/edit-profile/email", validateEditedEmail, editEmailProfile)
+  .put("/edit-profile/password", validateEditedPassword, editPasswordProfile)
   .delete("/delete-profile", deleteProfile);
 
 export default router;
