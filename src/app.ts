@@ -1,4 +1,5 @@
 import express, { Express, Request, Response } from "express";
+import cors from "cors";
 import dotenv from "dotenv";
 import { errorHandler } from "./midleware/error";
 
@@ -13,6 +14,7 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");
 });
 
+app.use(cors());
 app.use(errorHandler);
 
 export default app;
