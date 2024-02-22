@@ -90,7 +90,7 @@ const createPost = async ({
 };
 
 const getPosts = async (
-  page: string,
+  page: number,
   ignoreUserId?: number
 ): Promise<Array<posts>> => {
   const whereClause = ignoreUserId ? { user_id: { not: ignoreUserId } } : {};
@@ -141,7 +141,7 @@ const editPassword = async (
   userId: number,
   password: string
 ): Promise<users> => {
-  const hashPassword = await bcrypt.hash(password, 8);
+  const hashPassword = await bcrypt.hash(password, +config.bcrypt.saltRounds);
 
   const updatedUser = await prisma.users.update({
     where: {
@@ -181,9 +181,23 @@ const searchForPost = async (
       post_tags: true,
     },
   });
-  console.log(searchedPost);
 
   return searchedPost;
+};
+
+const deletePostById = async (postId: number): Promise<posts | null> => {
+  try {
+    const deletedPost = await prisma.posts.delete({
+      where: {
+        id: postId,
+      },
+    });
+
+    return deletedPost;
+  } catch (error) {
+    console.error("Failed to delete post:", error);
+    return null;
+  }
 };
 
 export {
@@ -196,4 +210,5 @@ export {
   getPosts,
   getUserByEmail,
   searchForPost,
+  deletePostById,
 };

@@ -1,6 +1,7 @@
 import express from "express";
 import multer from "multer";
 import {
+  deletePost,
   deleteProfile,
   editEmailProfile,
   editPasswordProfile,
@@ -14,9 +15,9 @@ import {
 } from "../controller/blog.controller";
 import { authToken } from "../midleware/auth";
 import {
-  validateEditedUserName,
   validateEditedEmail,
   validateEditedPassword,
+  validateEditedUserName,
   validateLogin,
   validatePost,
   validateRegister,
@@ -40,6 +41,7 @@ router
   .put("/edit-profile/username", validateEditedUserName, editUserNameProfile)
   .put("/edit-profile/email", validateEditedEmail, editEmailProfile)
   .put("/edit-profile/password", validateEditedPassword, editPasswordProfile)
+  .delete("/delete-post/:id", deletePost)
   .delete("/delete-profile", deleteProfile);
 
 export default router;

@@ -5,6 +5,7 @@ import { generateToken } from "../midleware/auth";
 import {
   createPost,
   createUser,
+  deletePostById,
   deleteUserProfile,
   editEmail,
   editPassword,
@@ -42,7 +43,7 @@ const login = catchAsync(async (req: Request, res: Response) => {
 const guest = catchAsync(async (req: Request, res: Response) => {
   const page = req.query.page as string;
 
-  const posts = await getPosts(page);
+  const posts = await getPosts(+page);
   return res.status(StatusCodes.OK).send(posts);
 });
 
@@ -117,7 +118,7 @@ const retrievePosts = catchAsync(async (req: Request, res: Response) => {
 
   const userId = +user.id;
   const page = req.query.page as string;
-  const post = await getPosts(page, userId);
+  const post = await getPosts(+page, userId);
   return res.status(StatusCodes.OK).send(post);
 });
 
@@ -133,6 +134,20 @@ const deleteProfile = catchAsync(async (req: Request, res: Response) => {
   return res.status(StatusCodes.BAD_REQUEST).send("Failed to delete profile");
 });
 
+const deletePost = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user as JwtPayload;
+  if (!user) return res.status(StatusCodes.UNAUTHORIZED).send("Unauthorized");
+
+  const postId = +req.params.id;
+
+  const deletedPost = await deletePostById(postId);
+
+  if (deletedPost) {
+    return res.status(StatusCodes.OK).send(deletedPost);
+  }
+  return res.status(StatusCodes.BAD_REQUEST).send("Failed to delete post");
+});
+
 const retrievePost = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as JwtPayload;
   if (!user) return res.status(StatusCodes.UNAUTHORIZED).send("Unauthorized");
@@ -146,6 +161,7 @@ const retrievePost = catchAsync(async (req: Request, res: Response) => {
 });
 
 export {
+  deletePost,
   deleteProfile,
   editEmailProfile,
   editPasswordProfile,
