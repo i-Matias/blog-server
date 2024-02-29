@@ -32,7 +32,7 @@ interface ICreatePostParams {
   content: string;
   tagName: string;
   alt: string;
-  img: Buffer | undefined;
+  fileName: string;
 }
 
 const executeQuery = (

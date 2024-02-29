@@ -10,7 +10,7 @@ datasource db {
 model images {
   id       Int    @id @default(autoincrement())
   alt      String @db.VarChar(16)
-  img_data Bytes  @db.Blob
+  fileName String @db.VarChar(255)
   post_id  Int
   posts    posts  @relation(fields: [post_id], references: [id], onDelete: Cascade, map: "images_ibfk_1")
 
@@ -53,4 +53,3 @@ model users {
   password String  @db.VarChar(64)
   posts    posts[]
 }
-

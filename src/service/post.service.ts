@@ -1,45 +1,6 @@
-import { posts, users } from "@prisma/client";
-import bcrypt from "bcrypt";
-import { config } from "../config/config";
+import { posts } from "@prisma/client";
 import prisma from "../database/prisma";
 import { ICreatePostParams } from "../utils/types";
-
-const createUser = async (
-  username: string,
-  email: string,
-  password: string
-): Promise<users | null> => {
-  const hashPassword = await bcrypt.hash(password, +config.bcrypt.saltRounds);
-
-  const user = await prisma.users.create({
-    data: {
-      username,
-      email,
-      password: hashPassword,
-    },
-  });
-
-  return user;
-};
-
-const getUserByEmail = async (
-  email: string,
-  password: string
-): Promise<users | null> => {
-  const user = await prisma.users.findUnique({
-    where: {
-      email,
-    },
-  });
-
-  if (!user) return null;
-
-  const match = await bcrypt.compare(password, user.password);
-  if (match) {
-    return user;
-  }
-  return null;
-};
 
 const createPost = async ({
   userId,
@@ -47,7 +8,7 @@ const createPost = async ({
   content,
   tagName,
   alt,
-  img,
+  fileName,
 }: ICreatePostParams): Promise<posts | null> => {
   return await prisma
     .$transaction(async (prisma) => {
@@ -71,7 +32,7 @@ const createPost = async ({
           images: {
             create: {
               alt,
-              img_data: img ?? Buffer.from(""),
+              fileName: fileName,
             },
           },
         },
@@ -107,61 +68,6 @@ const getPosts = async (
   });
 
   return posts;
-};
-
-const editUserName = async (
-  userId: number,
-  username: string
-): Promise<users> => {
-  const updatedUser = await prisma.users.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      username,
-    },
-  });
-
-  return updatedUser;
-};
-
-const editEmail = async (userId: number, email: string): Promise<users> => {
-  const updatedUser = await prisma.users.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      email,
-    },
-  });
-  return updatedUser;
-};
-
-const editPassword = async (
-  userId: number,
-  password: string
-): Promise<users> => {
-  const hashPassword = await bcrypt.hash(password, +config.bcrypt.saltRounds);
-
-  const updatedUser = await prisma.users.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      password: hashPassword,
-    },
-  });
-  return updatedUser;
-};
-
-const deleteUserProfile = async (userId: number): Promise<users> => {
-  const deletedUser = await prisma.users.delete({
-    where: {
-      id: userId,
-    },
-  });
-
-  return deletedUser;
 };
 
 const searchForPost = async (
@@ -200,15 +106,9 @@ const deletePostById = async (postId: number): Promise<posts | null> => {
   }
 };
 
-export {
+export default {
   createPost,
-  createUser,
-  deleteUserProfile,
-  editEmail,
-  editPassword,
-  editUserName,
-  getPosts,
-  getUserByEmail,
-  searchForPost,
   deletePostById,
+  getPosts,
+  searchForPost,
 };

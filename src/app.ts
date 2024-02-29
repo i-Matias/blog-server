@@ -6,7 +6,7 @@ import { errorHandler } from "./midleware/error";
 dotenv.config();
 
 const app: Express = express();
-
+app.use("/files/", express.static("uploads"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -16,5 +16,10 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use(cors());
 app.use(errorHandler);
+
+process.on("uncaughtException", (e) => {
+  console.log(e);
+  process.exit(1);
+});
 
 export default app;
