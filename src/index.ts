@@ -1,8 +1,7 @@
 import app from "./app";
-import router from "./route/route";
 import { config } from "./config/config";
-import usersRoute from "./route/users.route"
-import postRoute from "./route/posts.route"
+import usersRoute from "./route/users.route";
+import postRoute from "./route/posts.route";
 import { authToken } from "./midleware/auth";
 
 // app.use("/v1", router);

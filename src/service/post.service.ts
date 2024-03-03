@@ -106,9 +106,54 @@ const deletePostById = async (postId: number): Promise<posts | null> => {
   }
 };
 
+const updatePost = async (
+  postId: number,
+  { userId, title, content, tagName, alt, fileName }: ICreatePostParams
+): Promise<posts | null> => {
+  // prisma.$transaction(async (prisma) => {
+  //   const tag = await prisma.tags.findUnique({
+  //     where: { tag_name: tagName },
+  //   });
+  //   if (!tag) return null;
+
+  //   await prisma.post_tags.update({
+  //     where: {
+  //       post_id: postId,
+  //     },
+  //     data: {
+  //       tag_id: tag.id,
+  //     },
+  //   });
+
+  //   await prisma.posts.update({
+  //     where: {
+  //       id: postId,
+  //     },
+  //     data: {
+  //       title,
+  //       content,
+  //       created: new Date(),
+  //     },
+  //   });
+
+  //   await prisma.images.update({
+  //     where: {
+  //       post_id: postId,
+  //     },
+  //     data: {
+  //       alt,
+  //       fileName,
+  //     },
+  //   });
+  // });
+
+  return null;
+};
+
 export default {
   createPost,
   deletePostById,
   getPosts,
   searchForPost,
+  updatePost,
 };

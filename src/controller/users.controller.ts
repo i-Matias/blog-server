@@ -20,16 +20,15 @@ const register = catchAsync(async (req: Request, res: Response) => {
 const login = catchAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  console.log(email, password);
-
   const user = await userService.getUserByEmail(email, password);
 
   if (user) {
     const token = generateToken(user.id);
+
     return res
       .setHeader("Authorization", token)
       .status(StatusCodes.CREATED)
-      .send();
+      .send({ user, token });
   }
   return res.status(StatusCodes.UNAUTHORIZED).send("Invalid email or password");
 });
