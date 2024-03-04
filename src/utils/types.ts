@@ -1,20 +1,4 @@
 import { JwtPayload } from "jsonwebtoken";
-import { Connection, ResultSetHeader, RowDataPacket } from "mysql2";
-
-interface IUser {
-  id: number;
-  username: string;
-  email: string;
-  password: string;
-}
-
-interface IPost {
-  id: number;
-  title: string;
-  content: string;
-  created: Date;
-  userId: number;
-}
 
 interface IFullPost {
   username: string;
@@ -35,35 +19,43 @@ interface ICreatePostParams {
   fileName: string;
 }
 
-const executeQuery = (
-  connection: Connection,
-  query: string,
-  parameters: Array<any>
-): Promise<ResultSetHeader | RowDataPacket[]> => {
-  return new Promise((resolve, reject) => {
-    connection.execute(query, parameters, (err, result) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result as ResultSetHeader | RowDataPacket[]);
-      }
-    });
-  });
-};
+export interface IPost {
+  postId: number;
+  createdBy: string;
+  createdAt: Date;
+  title: string;
+  content: string;
+  image: {
+    fileName: string;
+    alt: string;
+  }[];
+  tagsName: string[];
+}
 
-const mapPost = (result: RowDataPacket[]): Array<IFullPost> => {
-  const posts = result.map((post) => {
-    return {
-      username: post.username as string,
-      title: post.title as string,
-      content: post.content as string,
-      created: post.created as Date,
-      tagName: post.tag_name as string,
-      alt: post.alt as string,
-      img: post.img_data as Buffer,
+export const filterPosts = (posts: any) => {
+  return posts.map((post: any) => {
+    const { username } = post.users;
+    const { id, title, content, created } = post;
+
+    const image: { fileName: string; alt: string }[] = post.images.map(
+      (image: any) => ({
+        alt: image.alt,
+        fileName: image.fileName,
+      })
+    );
+    const tagsName = post.post_tags.map((tag: any) => tag.tags.tag_name);
+
+    const filteredPost: IPost = {
+      postId: id,
+      createdBy: username,
+      createdAt: created,
+      title,
+      content,
+      tagsName,
+      image,
     };
+    return filteredPost;
   });
-  return posts;
 };
 
 declare global {
@@ -74,4 +66,4 @@ declare global {
   }
 }
 
-export { IUser, IPost, IFullPost, mapPost, executeQuery, ICreatePostParams };
+export { ICreatePostParams, IFullPost };

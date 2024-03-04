@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
 const router = express.Router();
 const upload = multer({ storage });
 router
-  .post("/", upload.single("img"), validatePost, postController.post)
+  .post("/", upload.single("image"), validatePost, postController.post)
   .get("/", postController.retrievePosts)
   .get("/:title", postController.retrievePost)
   .delete("/:id", postController.deletePost);

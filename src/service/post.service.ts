@@ -63,7 +63,11 @@ const getPosts = async (
     include: {
       images: true,
       users: true,
-      post_tags: true,
+      post_tags: {
+        include: {
+          tags: true,
+        },
+      },
     },
   });
 

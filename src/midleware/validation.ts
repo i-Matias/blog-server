@@ -34,8 +34,6 @@ export const validateLogin = [
 export const validatePost = [
   body("title").isString().isLength({ min: 3, max: 50 }),
   body("content").isString().isLength({ min: 3 }),
-  body("tagName").notEmpty(),
-  body("alt").isString().isLength({ min: 3, max: 50 }),
   async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
